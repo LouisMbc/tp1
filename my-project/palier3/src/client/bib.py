@@ -37,17 +37,21 @@ class BiblioClient:
             self.socket.send(pickle.dumps(request))
             return pickle.loads(self.socket.recv(4096))
 
-class Livre:
-    def __init__(self, titre, auteur, tag=None, image_ascii=None):
-        self.titre = titre
-        self.auteur = auteur
-        self.tag = tag
-        self.image_ascii = image_ascii
-
+class Book:
+    def __init__(self, id, author, title, content=None, tag=None, image_ascii=None):
+        self.__id = id
+        self.__title = title
+        self.__author = author
+        self.__content = content
+        self.__tag = tag
+        self.__image_ascii = image_ascii
+        
     def to_dict(self):
         return {
-            'titre': self.titre,
-            'auteur': self.auteur,
-            'tag': self.tag,
-            'image_ascii': self.image_ascii
+            'id': self.__id,
+            'title': self.__title,
+            'author': self.__author,
+            'content': self.__content,
+            'tag': self.__tag,
+            'image_ascii': self.__image_ascii
         }

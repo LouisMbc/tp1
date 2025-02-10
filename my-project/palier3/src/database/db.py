@@ -11,11 +11,11 @@ class BiblioDatabase:
             cursor.execute('''
                 CREATE TABLE IF NOT EXISTS livres (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    titre TEXT NOT NULL,
-                    auteur TEXT NOT NULL,
+                    title TEXT NOT NULL,
+                    author TEXT NOT NULL,
                     tag TEXT,
                     image_ascii TEXT,
-                    contenu TEXT
+                    content TEXT
                 )
             ''')
             conn.commit()
@@ -24,31 +24,33 @@ class BiblioDatabase:
         with sqlite3.connect(self.db_file) as conn:
             cursor = conn.cursor()
             cursor.execute('''
-                INSERT INTO livres (titre, auteur, tag, image_ascii, contenu)
+                INSERT INTO livres (title, author, tag, image_ascii, content)
                 VALUES (?, ?, ?, ?, ?)
-            ''', (livre['titre'], livre['auteur'], livre['tag'], 
-                 livre['image_ascii'], livre.get('contenu')))
+            ''', (livre['title'], livre['author'], livre['tag'], 
+                 livre['image_ascii'], livre.get('content')))
             conn.commit()
             return True
             
-    def supprimer_livre(self, titre, auteur):
+    def supprimer_livre(self, title, author):
         with sqlite3.connect(self.db_file) as conn:
             cursor = conn.cursor()
             cursor.execute('''
-                DELETE FROM livres WHERE titre = ? AND auteur = ?
-            ''', (titre, auteur))
+                DELETE FROM livres WHERE title = ? AND author = ?
+            ''', (title, author))
             return cursor.rowcount > 0
             
     def liste_livres(self):
         with sqlite3.connect(self.db_file) as conn:
             cursor = conn.cursor()
-            cursor.execute('SELECT titre, auteur, tag, image_ascii FROM livres')
+            cursor.execute('SELECT id, title, author, tag, image_ascii, content FROM livres')
             livres = []
             for row in cursor.fetchall():
                 livres.append({
-                    'titre': row[0],
-                    'auteur': row[1],
-                    'tag': row[2],
-                    'image_ascii': row[3]
+                    'id': row[0],
+                    'title': row[1],
+                    'author': row[2],
+                    'tag': row[3],
+                    'image_ascii': row[4],
+                    'content': row[5]
                 })
             return livres

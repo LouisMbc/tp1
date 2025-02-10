@@ -1,4 +1,4 @@
-from bib import Livre, Bibliotheque
+from bib import Book, BookStore
 
 def menu():
     print("\n=== Bibliothèque Locale ===")    
@@ -12,7 +12,7 @@ def menu():
     return input("Choix: ")
 
 def main():
-    biblio = Bibliotheque()
+    biblio = BookStore()
     fichier_json = "../data/bibliotheque.json"
     
     while True:
@@ -30,7 +30,7 @@ def main():
                 lignes.append(ligne)
             image_ascii = "\n".join(lignes) if lignes else None
             
-            livre = Livre(titre, auteur, tag=tag, image_ascii=image_ascii)
+            livre = Book(titre, auteur, tag=tag, image_ascii=image_ascii)
             biblio.ajouter_livre(livre)
             print("Livre ajouté avec succès")
             
@@ -47,7 +47,17 @@ def main():
             
         elif choix == "4":
             titre = input("Titre du livre: ")
-            biblio.afficher_detail_livre(titre)
+            book = biblio.get_book(titre)
+            if book:
+                print(f"\nDétails du livre:")
+                print(f"Titre: {book._Book__title}")
+                print(f"Auteur: {book._Book__author}")
+                print(f"Tag: {book._Book__tag}")
+                if book._Book__image_ascii:
+                    print("Image ASCII:")
+                    print(book._Book__image_ascii)
+            else:
+                print("Livre non trouvé")
             
         elif choix == "5":
             biblio.sauvegarder(fichier_json)

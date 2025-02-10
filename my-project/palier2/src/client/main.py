@@ -1,11 +1,12 @@
-from bib import BiblioClient, Livre
+from bib import BiblioClient, Book
 
 def menu():
     print("\n=== Bibliothèque Client/Serveur ===")
     print("1. Ajouter un livre")
     print("2. Supprimer un livre")
     print("3. Afficher tous les livres")
-    print("4. Quitter")
+    print("4. Afficher détail d'un livre")
+    print("5. Quitter")
     return input("Choix: ")
 
 def main():
@@ -32,23 +33,40 @@ def main():
                 lignes.append(ligne)
             image_ascii = "\n".join(lignes) if lignes else None
             
-            livre = Livre(titre, auteur, tag, image_ascii)
-            response = client.ajouter_livre(livre)
+            livre = Book(0, auteur, titre, tag=tag, image_ascii=image_ascii)
+            response = client.add(livre)
             print(response.get('message'))
             
         elif choix == "2":
             titre = input("Titre: ")
             auteur = input("Auteur: ")
-            response = client.supprimer_livre(titre, auteur)
+            response = client.remove(titre, auteur)
             print(response.get('message'))
             
         elif choix == "3":
-            response = client.liste_livres()
+            response = client.list()
             if response['status'] == 'success':
                 for livre in response['data']:
-                    print(f"- {livre['titre']} par {livre['auteur']}")
-            
+                    print(f"- {livre['title']} par {livre['author']}")
+            else:
+                print("Erreur:", response.get('message'))
+                
         elif choix == "4":
+            titre = input("Titre du livre: ")
+            response = client.get_book(titre)
+            if response['status'] == 'success':
+                book = response['data']
+                print(f"\nDétails du livre:")
+                print(f"Titre: {book['title']}")
+                print(f"Auteur: {book['author']}")
+                print(f"Tag: {book['tag']}")
+                if book['image_ascii']:
+                    print("Image ASCII:")
+                    print(book['image_ascii'])
+            else:
+                print("Livre non trouvé")
+                
+        elif choix == "5":
             break
 
 if __name__ == "__main__":

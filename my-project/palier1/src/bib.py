@@ -1,89 +1,69 @@
 import json
 
-class Livre:
-    def __init__(self, titre, auteur, tag=None, image_ascii=None, contenu=None):
-        self.titre = titre
-        self.auteur = auteur
-        self.tag = tag
-        self.image_ascii = image_ascii
-        self.contenu = contenu
-
-    def __str__(self):
-        return f"{self.titre} par {self.auteur}"
+class Book:
+    def __init__(self, id, author, title, content=None, tag=None, image_ascii=None):
+        self.__id = id
+        self.__title = title
+        self.__author = author
+        self.__content = content
+        self.__tag = tag
+        self.__image_ascii = image_ascii
         
-    def mettre_a_jour(self, titre=None, auteur=None, contenu=None):
-        if titre:
-            self.titre = titre
-        if auteur:
-            self.auteur = auteur
-            if contenu:
-                self.contenu = contenu
-            
-    def consulter(self):
-        if self.contenu:
-            return self.contenu
-        return f"Livre: {self.titre} par {self.auteur}"        
-
     def to_dict(self):
         return {
-            'titre': self.titre,
-            'auteur': self.auteur,
-            'tag': self.tag,
-            'image_ascii': self.image_ascii,
-            'contenu': self.contenu
+            'id': self.__id,
+            'title': self.__title,
+            'author': self.__author,
+            'content': self.__content,
+            'tag': self.__tag,
+            'image_ascii': self.__image_ascii
         }
 
-class Bibliotheque:
+class BookStore:
     def __init__(self):
-        self.livres = []
-
-    def ajouter_livre(self, livre):
-        if self._verifier_livre(livre):
-            self.livres.append(livre)
-            return True
-        return False
-
-    def _verifier_livre(self, livre):
-        return bool(livre.titre and livre.auteur)
-
-    def supprimer_livre(self, titre, auteur):
-        for livre in self.livres[:]:
-            if livre.titre == titre and livre.auteur == auteur:
-                self.livres.remove(livre)
+        self.__books = []
+        self.__next_id = 1
+        
+    def add(self, book):
+        book._Book__id = self.__next_id
+        self.__next_id += 1
+        self.__books.append(book)
+        
+    def remove(self, title, author):
+        for book in self.__books[:]:
+            if book._Book__title == title and book._Book__author == author:
+                self.__books.remove(book)
                 return True
         return False
+        
+    def list(self):
+        for book in self.__books:
+            print(f"- {book._Book__title} par {book._Book__author}")
+            
+    def get_book(self, title):
+        for book in self.__books:
+            if book._Book__title == title:
+                return book
+        return None
 
-    def chercher_livre(self, titre=None, auteur=None):
-        return [livre for livre in self.livres 
-                if (not titre or livre.titre == titre) and 
-                (not auteur or livre.auteur == auteur)]
+    def to_dict(self):
+        return [book.to_dict() for book in self.__books]
 
-    def afficher_tous_livres(self):
-        print("\nListe des livres:")
-        for livre in self.livres:
-            print(f"- {livre.titre} par {livre.auteur} (Tag: {livre.tag})")
+class Library(BookStore):
+    pass
 
-    def afficher_detail_livre(self, titre):
-        for livre in self.livres:
-            if livre.titre == titre:
-                print(f"\nDétails du livre '{livre.titre}':")
-                print(f"Auteur: {livre.auteur}")
-                print(f"Tag: {livre.tag}")
-                if livre.image_ascii:
-                    print("Image ASCII:")
-                    print(livre.image_ascii)
-                return
-        print("Livre non trouvé")
+class User:
+    pass
 
-    def sauvegarder(self, fichier):
-        data = [livre.to_dict() for livre in self.livres]
-        with open(fichier, 'w', encoding='utf-8') as f:
-            json.dump(data, f, indent=2, ensure_ascii=False)
-
-    def charger(self, fichier):
-        try:
-            with open(fichier, 'r', encoding='utf-8') as f:
-                data = json.load(f)
-                self.livres = [Livre(**livre_data) for livre_data in data]
-        except FileNotFoundError:
-            print("Aucun fichier de sauvegarde trouvé")
+class App:
+    def __init__(self):
+        self.__actions = {
+            'ls': self.list_books,
+            'new': self.new_book,
+            'del': self.delete_book,
+            'get': self.get_book,
+            'save': self.save_to_disk,
+            'load': self.load_from_disk
+        }
+        self.__book_store = BookStore()
+        self.__library = Library()

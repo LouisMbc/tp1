@@ -1,4 +1,4 @@
-from bib import BiblioClient, Livre
+from bib import BiblioClient, Book
 import sys
 
 def menu():
@@ -6,7 +6,8 @@ def menu():
     print("1. Ajouter un livre")
     print("2. Supprimer un livre")
     print("3. Afficher tous les livres")
-    print("4. Quitter")
+    print("4. Afficher détail d'un livre")
+    print("5. Quitter")
     return input("Choix: ")
 
 def main():
@@ -34,28 +35,43 @@ def main():
                     lignes.append(ligne)
                 image_ascii = "\n".join(lignes) if lignes else None
                 
-                livre = Livre(titre, auteur, tag, image_ascii)
-                response = client.send_request('ajouter_livre', livre.to_dict())
+                livre = Book(0, auteur, titre, tag=tag, image_ascii=image_ascii)
+                response = client.send_request('add', livre.to_dict())
                 print(response.get('message'))
                 
             elif choix == "2":
                 titre = input("Titre: ")
                 auteur = input("Auteur: ")
-                response = client.send_request('supprimer_livre', {
-                    'titre': titre,
-                    'auteur': auteur
+                response = client.send_request('remove', {
+                    'title': titre,
+                    'author': auteur
                 })
                 print(response.get('message'))
                 
             elif choix == "3":
-                response = client.send_request('liste_livres')
+                response = client.send_request('list')
                 if response['status'] == 'success':
                     for livre in response['data']:
-                        print(f"- {livre['titre']} par {livre['auteur']} (Tag: {livre['tag']})")
+                        print(f"- {livre['title']} par {livre['author']} (Tag: {livre['tag']})")
                 else:
                     print("Erreur:", response.get('message'))
                     
             elif choix == "4":
+                titre = input("Titre du livre: ")
+                response = client.send_request('get_book', {'title': titre})
+                if response['status'] == 'success':
+                    book = response['data']
+                    print(f"\nDétails du livre:")
+                    print(f"Titre: {book['title']}")
+                    print(f"Auteur: {book['author']}")
+                    print(f"Tag: {book['tag']}")
+                    if book['image_ascii']:
+                        print("Image ASCII:")
+                        print(book['image_ascii'])
+                else:
+                    print("Livre non trouvé")
+                    
+            elif choix == "5":
                 break
                 
         except Exception as e:

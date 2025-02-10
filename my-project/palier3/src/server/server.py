@@ -41,25 +41,34 @@ class BiblioServer:
         data = request.get('data', {})
         
         try:
-            if action == 'ajouter_livre':
+            if action == 'add':
                 success = self.db.ajouter_livre(data)
                 return {
                     'status': 'success' if success else 'error',
                     'message': 'Livre ajouté' if success else 'Erreur lors de l\'ajout'
                 }
                 
-            elif action == 'supprimer_livre':
-                success = self.db.supprimer_livre(data['titre'], data['auteur'])
+            elif action == 'remove':
+                success = self.db.supprimer_livre(data['title'], data['author'])
                 return {
                     'status': 'success' if success else 'error',
                     'message': 'Livre supprimé' if success else 'Livre non trouvé'
                 }
                 
-            elif action == 'liste_livres':
+            elif action == 'list':
                 livres = self.db.liste_livres()
                 return {
                     'status': 'success',
                     'data': livres
+                }
+                
+            elif action == 'get_book':
+                books = self.db.liste_livres()
+                book = next((b for b in books if b['title'] == data['title']), None)
+                return {
+                    'status': 'success' if book else 'error',
+                    'data': book,
+                    'message': None if book else 'Livre non trouvé'
                 }
                 
             return {'status': 'error', 'message': 'Action non reconnue'}
